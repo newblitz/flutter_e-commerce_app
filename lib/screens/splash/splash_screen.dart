@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shop_app/main.dart';
+import 'package:shop_app/theme.dart';
 
 import '../../constants.dart';
 import '../sign_in/sign_in_screen.dart';
@@ -13,16 +15,18 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   int currentPage = 0;
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
   List<Map<String, String>> splashData = [
     {
-      "text": "Welcome to Tokoto, Let’s shop!",
+      "text": "Welcome to Crux, Let's shop!",
       "image": "assets/images/splash_1.png"
     },
     {
-      "text":
-          "We help people conect with store \naround United State of America",
+      "text": "We help people connect with stores \naround the world",
       "image": "assets/images/splash_2.png"
     },
     {
@@ -30,6 +34,27 @@ class _SplashScreenState extends State<SplashScreen> {
       "image": "assets/images/splash_3.png"
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+    _controller.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,6 +63,27 @@ class _SplashScreenState extends State<SplashScreen> {
           width: double.infinity,
           child: Column(
             children: <Widget>[
+              Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: IconButton(
+                    icon: Icon(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Icons.light_mode
+                          : Icons.dark_mode,
+                    ),
+                    onPressed: () async {
+                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      await AppTheme.setDarkMode(!isDark);
+                      if (mounted) {
+                        final appState = context.findAncestorStateOfType<MyAppState>();
+                        appState?.toggleTheme();
+                      }
+                    },
+                  ),
+                ),
+              ),
               Expanded(
                 flex: 3,
                 child: PageView.builder(
@@ -47,9 +93,12 @@ class _SplashScreenState extends State<SplashScreen> {
                     });
                   },
                   itemCount: splashData.length,
-                  itemBuilder: (context, index) => SplashContent(
-                    image: splashData[index]["image"],
-                    text: splashData[index]['text'],
+                  itemBuilder: (context, index) => FadeTransition(
+                    opacity: _animation,
+                    child: SplashContent(
+                      image: splashData[index]["image"],
+                      text: splashData[index]['text'],
+                    ),
                   ),
                 ),
               ),
@@ -72,7 +121,9 @@ class _SplashScreenState extends State<SplashScreen> {
                             decoration: BoxDecoration(
                               color: currentPage == index
                                   ? kPrimaryColor
-                                  : const Color(0xFFD8D8D8),
+                                  : Theme.of(context).brightness == Brightness.dark
+                                      ? Colors.white70
+                                      : const Color(0xFFD8D8D8),
                               borderRadius: BorderRadius.circular(3),
                             ),
                           ),
@@ -83,7 +134,18 @@ class _SplashScreenState extends State<SplashScreen> {
                         onPressed: () {
                           Navigator.pushNamed(context, SignInScreen.routeName);
                         },
-                        child: const Text("Continue"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kPrimaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: const Text(
+                          "Continue",
+                          style: TextStyle(fontSize: 16),
+                        ),
                       ),
                       const Spacer(),
                     ],

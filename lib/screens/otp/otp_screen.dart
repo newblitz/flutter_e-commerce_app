@@ -26,7 +26,7 @@ class OtpScreen extends StatelessWidget {
                   "OTP Verification",
                   style: headingStyle,
                 ),
-                const Text("We sent your code to +1 898 860 ***"),
+                const Text("We sent your code to +91 8962255639 ***"),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
